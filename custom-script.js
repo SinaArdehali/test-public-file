@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Variables de configuration
+    var otpSent = false; // Pour suivre si l'OTP a déjà été envoyé
+    var phoneNumber = ""; // Pour stocker le numéro de téléphone
+    var otpInput = null; // Référence pour le champ de saisie OTP
+
     // Sélectionner le bouton "S'inscrire"
     var submitButton = document.querySelector('a[href="#submit-form"]');
     if (!submitButton) {
@@ -8,48 +13,107 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Intercepter l'événement de clic sur le bouton "S'inscrire"
     submitButton.addEventListener("click", function (event) {
-        event.preventDefault(); // Empêcher le comportement par défaut du bouton (la redirection)
+        event.preventDefault(); // Empêcher le comportement par défaut du bouton
 
-        var phoneNumber = document.querySelector('input[name="phone"]').value; // Sélectionner le champ de téléphone
-        console.log(phoneNumber);
+        // Si l'OTP a déjà été envoyé, vérifier le code OTP
+        if (otpSent) {
+            verifyOtpCode();
+        } else {
+            // Sinon, envoyer le numéro de téléphone pour générer un OTP
+            phoneNumber = document.querySelector('input[name="phone"]').value; // Sélectionner le champ de téléphone
+            if (!phoneNumber) {
+                alert("Veuillez entrer votre numéro de téléphone.");
+                return;
+            }
+            sendPhoneNumber(phoneNumber);
+        }
+    });
 
-        // Afficher un message de chargement ou désactiver le bouton
+    // Fonction pour envoyer le numéro de téléphone à l'API
+    function sendPhoneNumber(phone) {
         submitButton.classList.add('disabled');
-        submitButton.textContent = "Vérification en cours...";
+        submitButton.textContent = "Envoi du code SMS...";
 
-        // Simuler un appel API avec un délai de 5 secondes
-        simulateApiCall(phoneNumber)
+        // Simuler l'appel API avec un délai (vous devrez remplacer cela par une requête réelle)
+        simulateApiSendOtp(phone)
+            .then(function () {
+                // Activer la vérification OTP
+                otpSent = true;
+                displayOtpInputField();
+                submitButton.classList.remove('disabled');
+                submitButton.textContent = "Vérifier le code";
+            })
+            .catch(function (error) {
+                console.error("Erreur lors de l'envoi du code OTP : ", error);
+                alert("Une erreur est survenue lors de l'envoi du code SMS. Veuillez réessayer.");
+                submitButton.classList.remove('disabled');
+                submitButton.textContent = "S'inscrire";
+            });
+    }
+
+    // Fonction pour afficher le champ de saisie OTP
+    function displayOtpInputField() {
+        if (!otpInput) {
+            otpInput = document.createElement("input");
+            otpInput.type = "text";
+            otpInput.placeholder = "Entrez le code OTP reçu";
+            otpInput.className = "elInput elInput100 elAlign_left elInputMid elInputStyl0 elInputBG1 elInputI0 elInputIBlack elInputBR1";
+            otpInput.style.marginTop = "10px";
+            submitButton.parentNode.insertBefore(otpInput, submitButton);
+        }
+    }
+
+    // Fonction pour vérifier le code OTP
+    function verifyOtpCode() {
+        var otpCode = otpInput.value;
+        if (!otpCode) {
+            alert("Veuillez entrer le code OTP.");
+            return;
+        }
+
+        submitButton.classList.add('disabled');
+        submitButton.textContent = "Vérification du code...";
+
+        // Simuler la vérification de l'OTP (remplacer par une requête API réelle)
+        simulateApiVerifyOtp(phoneNumber, otpCode)
             .then(function (isValid) {
                 if (isValid) {
-                    // Si le numéro est valide, simuler le comportement par défaut du bouton
+                    // Si le code est valide, poursuivre la soumission du formulaire
                     submitButton.classList.remove('disabled');
-                    submitButton.textContent = "S'INSCRIRE";
-                    submitButton.click(); // Déclencher le clic programmatique pour continuer le flux normal
+                    submitButton.textContent = "S'inscrire";
+                    submitButton.click(); // Déclencher la soumission
                 } else {
-                    // Si le numéro est invalide, afficher un message d'erreur et débloquer le bouton
-                    alert("Le numéro de téléphone est invalide. Veuillez réessayer.");
+                    // Si le code est invalide, afficher un message d'erreur
+                    alert("Code OTP invalide. Veuillez réessayer.");
                     submitButton.classList.remove('disabled');
-                    submitButton.textContent = "S'INSCRIRE";
+                    submitButton.textContent = "Vérifier le code";
                 }
             })
             .catch(function (error) {
-                // En cas d'erreur lors de la requête, afficher un message d'erreur
-                console.error("Erreur lors de la validation du numéro : ", error);
-                alert("Une erreur est survenue. Veuillez réessayer.");
+                console.error("Erreur lors de la vérification du code OTP : ", error);
+                alert("Une erreur est survenue lors de la vérification. Veuillez réessayer.");
                 submitButton.classList.remove('disabled');
-                submitButton.textContent = "S'INSCRIRE";
+                submitButton.textContent = "Vérifier le code";
             });
-    });
+    }
 
-    // Fonction pour simuler un appel API avec un délai de 5 secondes
-    function simulateApiCall(phoneNumber) {
+    // Simuler l'envoi de l'OTP (remplacer cette fonction par une requête API réelle)
+    function simulateApiSendOtp(phone) {
         return new Promise(function (resolve, reject) {
-            // Simuler un délai de 5 secondes
             setTimeout(function () {
-                // Simuler une réponse aléatoire pour la validation
-                var isValid = Math.random() > 0.5; // 50% de chances que le numéro soit valide
+                console.log("Code OTP envoyé au numéro : " + phone);
+                resolve(); // Simuler le succès
+            }, 2000);
+        });
+    }
+
+    // Simuler la vérification de l'OTP (remplacer cette fonction par une requête API réelle)
+    function simulateApiVerifyOtp(phone, otp) {
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                var isValid = otp === "1234"; // Simuler que le code correct est "1234"
                 resolve(isValid);
-            }, 5000);
+            }, 2000);
         });
     }
 });
