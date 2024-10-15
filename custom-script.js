@@ -1,4 +1,3 @@
-<script>
     document.addEventListener("DOMContentLoaded", function () {
       // Sélectionner le bouton "S'inscrire"
       var submitButton = document.querySelector('a[href="#submit-form"]');
@@ -26,5 +25,4 @@
          originalButtonText.textContent = "Vérification en cours...";
 
       });
-   }); <
-/script>
+   });
