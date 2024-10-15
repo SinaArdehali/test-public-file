@@ -23,7 +23,7 @@
          submitButton.classList.add('disabled'); // Ajoutez une classe pour indiquer le chargement si nécessaire
          // submitButton.querySelector('.elButtonMain').textContent = "Vérification en cours...";
          // originalButtonText.textContent = "Vérification en cours...";
-        originalButtonText.textContent = "Vérification en cours..."; // Mettre à jour le texte du bouton
+        submitButton.textContent = "Vérification en cours..."; // Mettre à jour le texte du bouton
 
       });
    });
