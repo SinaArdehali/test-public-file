@@ -6,7 +6,7 @@
          return;
       }
 
-      var originalButtonText = submitButton.querySelector('.elButtonMain').textContent;
+      var originalButtonText = submitButton.querySelector('.elButtonMain');
       if (!originalButtonText) {
          console.error("Texte du bouton 'S'inscrire' non trouvé.");
          return;
@@ -21,8 +21,9 @@
 
          // Afficher un message de chargement ou désactiver le bouton
          submitButton.classList.add('disabled'); // Ajoutez une classe pour indiquer le chargement si nécessaire
-         submitButton.querySelector('.elButtonMain').textContent = "Vérification en cours...";
+         // submitButton.querySelector('.elButtonMain').textContent = "Vérification en cours...";
          // originalButtonText.textContent = "Vérification en cours...";
+        originalButtonText.textContent = "Vérification en cours..."; // Mettre à jour le texte du bouton
 
       });
    });
