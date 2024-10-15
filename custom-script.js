@@ -21,8 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
         simulateApiCall(phoneNumber)
             .then(function (isValid) {
                 if (isValid) {
-                    // Si le numéro est valide, poursuivre la soumission de la page
-                    window.location.href = submitButton.getAttribute('href');
+                    // Si le numéro est valide, simuler le comportement par défaut du bouton
+                    submitButton.classList.remove('disabled');
+                    submitButton.textContent = "S'INSCRIRE";
+                    submitButton.click(); // Déclencher le clic programmatique pour continuer le flux normal
                 } else {
                     // Si le numéro est invalide, afficher un message d'erreur et débloquer le bouton
                     alert("Le numéro de téléphone est invalide. Veuillez réessayer.");
