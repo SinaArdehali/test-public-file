@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Indicateur pour vérifier si l'OTP a été vérifié
   var otpVerified = false;
 
-  submitButton.addEventListener('click', function(event) {
+  // Variable pour stocker l'OTP généré
+  var generatedOtp = '';
+
+  // Fonction de gestion du clic
+  function handleSubmit(event) {
     if (!otpVerified) {
       event.preventDefault(); // Empêcher l'action par défaut
 
@@ -21,15 +25,22 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      // Générer un OTP simulé
-      var generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log('Code OTP généré (pour test) : ' + generatedOtp);
+      // Générer un OTP simulé s'il n'a pas déjà été généré
+      if (!generatedOtp) {
+        generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log('Code OTP généré (pour test) : ' + generatedOtp);
+      }
 
       // Afficher la modale OTP
       showOtpPrompt().then(function(enteredOtp) {
         if (enteredOtp === generatedOtp) {
-          // L'OTP est correct, mettre à jour l'indicateur et relancer le clic
+          // L'OTP est correct, mettre à jour l'indicateur
           otpVerified = true;
+
+          // Supprimer l'écouteur d'événement pour éviter une boucle
+          submitButton.removeEventListener('click', handleSubmit);
+
+          // Lancer l'action par défaut
           submitButton.click();
         } else {
           alert('Code OTP incorrect, veuillez réessayer.');
@@ -39,7 +50,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // L'OTP a été vérifié, laisser l'action par défaut se produire
       // Aucune action nécessaire ici
     }
-  });
+  }
+
+  // Ajouter l'écouteur d'événement au bouton de soumission
+  submitButton.addEventListener('click', handleSubmit);
 
   function showOtpPrompt() {
     return new Promise(function(resolve) {
