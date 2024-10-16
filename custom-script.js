@@ -1,48 +1,49 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Retrieve the submit button
+  // Récupérer le bouton de soumission
   var submitButton = document.querySelector('#tmp_button-48759 a');
 
-  // Store the original href in case we need to use it later
+  // Stocker l'attribut href original
   var originalHref = submitButton.getAttribute('href');
 
+  // Indicateur pour vérifier si l'OTP a été vérifié
+  var otpVerified = false;
+
   submitButton.addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent the default action
+    if (!otpVerified) {
+      event.preventDefault(); // Empêcher l'action par défaut
 
-    // Retrieve the phone number
-    var phoneInput = document.querySelector('input[name="phone"]');
-    var phoneNumber = phoneInput ? phoneInput.value.trim() : '';
+      // Récupérer le numéro de téléphone
+      var phoneInput = document.querySelector('input[name="phone"]');
+      var phoneNumber = phoneInput ? phoneInput.value.trim() : '';
 
-    if (!phoneNumber) {
-      alert('Veuillez entrer votre numéro de téléphone.');
-      return;
-    }
-
-    // Mock sending OTP
-    var generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log('Generated OTP (for testing purposes): ' + generatedOtp);
-
-    // Display OTP modal
-    showOtpPrompt().then(function(enteredOtp) {
-      if (enteredOtp === generatedOtp) {
-        // OTP is correct, proceed with submission
-        // Remove the event listener to avoid infinite loop
-        submitButton.removeEventListener('click', arguments.callee);
-
-        // Option 1: Trigger the default action
-        window.location.href = originalHref;
-
-        // Option 2: Programmatically submit data if necessary
-        // collectAndSubmitData();
-
-      } else {
-        alert('Code OTP incorrect, veuillez réessayer.');
+      if (!phoneNumber) {
+        alert('Veuillez entrer votre numéro de téléphone.');
+        return;
       }
-    });
+
+      // Générer un OTP simulé
+      var generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log('Code OTP généré (pour test) : ' + generatedOtp);
+
+      // Afficher la modale OTP
+      showOtpPrompt().then(function(enteredOtp) {
+        if (enteredOtp === generatedOtp) {
+          // L'OTP est correct, mettre à jour l'indicateur et relancer le clic
+          otpVerified = true;
+          submitButton.click();
+        } else {
+          alert('Code OTP incorrect, veuillez réessayer.');
+        }
+      });
+    } else {
+      // L'OTP a été vérifié, laisser l'action par défaut se produire
+      // Aucune action nécessaire ici
+    }
   });
 
   function showOtpPrompt() {
     return new Promise(function(resolve) {
-      // Create the modal overlay
+      // Créer la superposition de la modale
       var modalOverlay = document.createElement('div');
       modalOverlay.style.position = 'fixed';
       modalOverlay.style.top = '0';
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
       modalOverlay.style.justifyContent = 'center';
       modalOverlay.style.zIndex = '1000';
 
-      // Create the modal content
+      // Créer le contenu de la modale
       var modalContent = document.createElement('div');
       modalContent.style.backgroundColor = '#fff';
       modalContent.style.padding = '20px';
@@ -64,12 +65,12 @@ document.addEventListener('DOMContentLoaded', function() {
       modalContent.style.maxWidth = '90%';
       modalContent.style.boxSizing = 'border-box';
 
-      // Create the message
+      // Créer le message
       var message = document.createElement('p');
-      message.textContent = 'Veuillez entrer le code OTP envoyé à votre téléphone:';
+      message.textContent = 'Veuillez entrer le code OTP envoyé à votre téléphone :';
       modalContent.appendChild(message);
 
-      // Create the input field
+      // Créer le champ de saisie
       var otpInput = document.createElement('input');
       otpInput.type = 'text';
       otpInput.placeholder = 'Code OTP';
@@ -81,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
       otpInput.style.border = '1px solid #ccc';
       modalContent.appendChild(otpInput);
 
-      // Create the submit button
+      // Créer le bouton de validation
       var submitOtpButton = document.createElement('button');
       submitOtpButton.textContent = 'Valider';
       submitOtpButton.style.padding = '10px 20px';
@@ -93,60 +94,27 @@ document.addEventListener('DOMContentLoaded', function() {
       submitOtpButton.style.cursor = 'pointer';
       modalContent.appendChild(submitOtpButton);
 
-      // Add content to overlay
+      // Ajouter le contenu à la superposition
       modalOverlay.appendChild(modalContent);
       document.body.appendChild(modalOverlay);
 
-      // Focus on the OTP input
+      // Mettre le focus sur le champ OTP
       otpInput.focus();
 
-      // Handle OTP submission
+      // Gérer la soumission de l'OTP
       submitOtpButton.addEventListener('click', function() {
         var enteredOtp = otpInput.value.trim();
-        // Clean up the modal
+        // Nettoyer la modale
         document.body.removeChild(modalOverlay);
         resolve(enteredOtp);
       });
 
-      // Allow pressing "Enter" to submit
+      // Permettre la soumission en appuyant sur "Entrée"
       otpInput.addEventListener('keyup', function(event) {
         if (event.key === 'Enter') {
           submitOtpButton.click();
         }
       });
-    });
-  }
-
-  // Optional: Function to programmatically submit data via AJAX if needed
-  function collectAndSubmitData() {
-    var firstNameInput = document.querySelector('input[name="first_name"]');
-    var firstName = firstNameInput ? firstNameInput.value.trim() : '';
-
-    var phoneInput = document.querySelector('input[name="phone"]');
-    var phoneNumber = phoneInput ? phoneInput.value.trim() : '';
-
-    // Prepare data to submit
-    var formData = new FormData();
-    formData.append('first_name', firstName);
-    formData.append('phone', phoneNumber);
-
-    // Submit data via AJAX
-    fetch('https://your-backend.com/submit', {
-      method: 'POST',
-      body: formData
-    })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(data) {
-      // Handle response
-      console.log('Form submitted successfully:', data);
-      // Optionally redirect the user
-      window.location.href = '/thank-you-page';
-    })
-    .catch(function(error) {
-      console.error('Error submitting form:', error);
-      alert('Une erreur est survenue lors de la soumission du formulaire.');
     });
   }
 });
